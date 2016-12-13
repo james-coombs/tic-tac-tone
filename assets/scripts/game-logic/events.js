@@ -4,6 +4,7 @@
 const api = require('./api');
 const ui = require('./ui');
 const getFormFields = require('../../../lib/get-form-fields');
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // game turn counter, increases with clicks on cells
 let gameTurns = 0;
@@ -13,6 +14,8 @@ let gameBoardArray = ['', '', '', '', '', '', '', '', '', ];
 let gameIsOver = false;
 // variable for X/O switching
 let player = 'x';
+
+
 
 // reset board and 'POST' for new game
 const onNewGame = function onNewGame(event) {
@@ -40,30 +43,26 @@ const onGetGameById = function(event) {
     .fail(ui.onError);
 };
 
-// const createOldGameArray = function (data) {
-// $('.cell-0').text(data.game.cells[0]);
-// $('.cell-1').text(data.game.cells[1]);
-// $('.cell-2').text(data.game.cells[2]);
-// $('.cell-3').text(data.game.cells[3]);
-// $('.cell-4').text(data.game.cells[4]);
-// $('.cell-5').text(data.game.cells[5]);
-// $('.cell-6').text(data.game.cells[6]);
-// $('.cell-7').text(data.game.cells[7]);
-// $('.cell-8').text(data.game.cells[8]);
-// };
-
-// const renderOldGame = function () {
-//   event.preventDefault();
-//   api.getGameById()
-//     .done(createOldGameArray);
-// };
-
 const onGetGamesPlayed = function (data) {
   event.preventDefault();
   api.getGamesPlayed(data)
     .done(ui.getGamesPlayedSuccess)
     .fail(ui.onError);
     //console.log(data);
+};
+
+const gameResolutionTie = function() {
+  if (gameTurns === 9) {
+    //console.log('Tie');
+    $('.info').text('It is a tie. Press the New Game button to play a new game.');
+    gameIsOver = true;
+  }
+};
+
+const hideBoardAfterResolution = function () {
+  if (gameIsOver === true) {
+    $('.game-board').hide();
+  }
 };
 
 const gameResolutionXorO = function() {
@@ -151,33 +150,119 @@ const gameResolutionXorO = function() {
   }
 };
 
-const gameResolutionTie = function() {
-  if (gameTurns === 9) {
-    //console.log('Tie');
-    $('.info').text('It is a tie. Press the New Game button to play a new game.');
-    gameIsOver = true;
-  }
+const oscillatorX = audioCtx.createOscillator();
+const gainNodeX = audioCtx.createGain();
+
+oscillatorX.connect(gainNodeX);
+
+gainNodeX.connect(audioCtx.destination);
+
+oscillatorX.type = 'sine'; // sine wave — other values are 'square', 'sawtooth', 'triangle' and 'custom'
+oscillatorX.frequency.value = 150; // value in hertz
+
+const stopOscoscillatorX = () => {
+  // gainNodeX.disconnect(audioCtx.destination);
+  oscillatorX.stop();
 };
 
-const hideBoardAfterResolution = function () {
-  if (gameIsOver === true) {
-    $('.game-board').hide();
-  }
+const startOscoscillatorX = () => {
+  oscillatorX.start();
 };
+
+const oscillatorO = audioCtx.createOscillator();
+const gainNodeO = audioCtx.createGain();
+
+oscillatorO.connect(gainNodeO);
+
+gainNodeO.connect(audioCtx.destination);
+
+oscillatorO.type = 'triangle'; // sine wave — other values are 'square', 'sawtooth', 'triangle' and 'custom'
+oscillatorO.frequency.value = 200; // value in hertz
+
+const stopOscoscillatorO = () => {
+  // gainNodeO.disconnect(audioCtx.destination);
+  oscillatorO.stop();
+};
+
+const startOscoscillatorO = () => {
+  oscillatorO.start();
+};
+
+//oscillatorO.start();
+//
+// oscillator.type = 'triangle'; // sine wave — other values are 'square', 'sawtooth', 'triangle' and 'custom'
+// oscillator.frequency.value = 300; // value in hertz
+// oscillator.start();
+//
+// let WIDTH = window.innerWidth;
+// let HEIGHT = window.innerHeight;
+//
+// let maxFreq = 6000;
+// let maxVol = 1;
+//
+// let initialFreq = 3000;
+// let initialVol = 0.5;
+//
+// // Mouse pointer coordinates
+//
+// let CurX;
+// let CurY;
+//
+// // Get new mouse pointer coordinates when mouse is moved
+// // then set new gain and pitch values
+//
+// function updatePage(e) {
+//     CurX = (window.Event) ? e.pageX : event.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
+//     CurY = (window.Event) ? e.pageY : event.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
+//
+//     oscillator.frequency.value = (CurX/WIDTH) * maxFreq;
+//     gainNode.gain.value = (CurY/HEIGHT) * maxVol;
+//
+//     //canvasDraw();
+// }
+//
+// document.onmousemove = updatePage;
+//
+// // set options for the oscillator
+//
+// oscillator.type = 'sine'; // sine wave — other values are 'square', 'sawtooth', 'triangle' and 'custom'
+// oscillator.frequency.value = initialFreq; // value in hertz
+// oscillator.start();
+//
+// gainNode.gain.value = initialVol;
+//
+// let mute = document.querySelector('.mute');
+//
+// mute.onclick = function() {
+//   if(mute.id === "") {
+//     gainNode.disconnect(audioCtx.destination);
+//     mute.id = "activated";
+//     mute.innerHTML = "Unmute";
+//   } else {
+//     gainNode.connect(audioCtx.destination);
+//     mute.id = "";
+//     mute.innerHTML = "Mute";
+//   }
+// };
+
 
 const setGame = function() {
   let i;
   if (player === 'x' && $(this).text() === '') {
     $(this).text('x');
+    startOscoscillatorX();
     gameTurns++;
     player = 'o';
     $('.info').text('it is ' + player + '\'s move');
+    stopOscoscillatorX();
   }
   if (player === 'o' && $(this).text() === '') {
     $(this).text('o');
+    startOscoscillatorO();
     gameTurns++;
     player = 'x';
     $('.info').text('it is ' + player + '\'s move');
+    stopOscoscillatorO();
   }
   i = $(this).data('index');
   gameBoardArray[i] = $(this).text();
@@ -199,4 +284,8 @@ module.exports = {
   gameResolutionTie,
   onGetGamesPlayed,
   hideBoardAfterResolution,
+  startOscoscillatorX,
+  stopOscoscillatorX,
+  startOscoscillatorO,
+  stopOscoscillatorO,
 };
