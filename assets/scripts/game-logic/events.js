@@ -4,7 +4,8 @@
 const api = require('./api');
 const ui = require('./ui');
 const getFormFields = require('../../../lib/get-form-fields');
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const audioCtxX = new (window.AudioContext || window.webkitAudioContext)();
+const audioCtxO = new (window.AudioContext || window.webkitAudioContext)();
 
 // game turn counter, increases with clicks on cells
 let gameTurns = 0;
@@ -150,43 +151,46 @@ const gameResolutionXorO = function() {
   }
 };
 
-const oscillatorX = audioCtx.createOscillator();
-const gainNodeX = audioCtx.createGain();
+const oscillatorX = audioCtxX.createOscillator();
+const gainNodeX = audioCtxX.createGain();
 
 oscillatorX.connect(gainNodeX);
 
-gainNodeX.connect(audioCtx.destination);
+gainNodeX.connect(audioCtxX.destination);
 
 oscillatorX.type = 'sine'; // sine wave — other values are 'square', 'sawtooth', 'triangle' and 'custom'
 oscillatorX.frequency.value = 150; // value in hertz
 
 const stopOscoscillatorX = () => {
-  // gainNodeX.disconnect(audioCtx.destination);
-  oscillatorX.stop();
+  gainNodeX.disconnect(audioCtxX.destination);
 };
 
 const startOscoscillatorX = () => {
-  oscillatorX.start();
+  if (player === 'x')
+  {gainNodeX.connect(audioCtxX.destination);
+  oscillatorX.start();}
 };
 
-const oscillatorO = audioCtx.createOscillator();
-const gainNodeO = audioCtx.createGain();
+const oscillatorO = audioCtxO.createOscillator();
+const gainNodeO = audioCtxO.createGain();
 
 oscillatorO.connect(gainNodeO);
 
-gainNodeO.connect(audioCtx.destination);
+gainNodeO.connect(audioCtxO.destination);
 
 oscillatorO.type = 'triangle'; // sine wave — other values are 'square', 'sawtooth', 'triangle' and 'custom'
 oscillatorO.frequency.value = 200; // value in hertz
 
 const stopOscoscillatorO = () => {
-  // gainNodeO.disconnect(audioCtx.destination);
-  oscillatorO.stop();
+  gainNodeO.disconnect(audioCtxO.destination);
 };
 
 const startOscoscillatorO = () => {
-  oscillatorO.start();
+  if (player === 'o')
+  {gainNodeO.connect(audioCtxO.destination);
+  oscillatorO.start();}
 };
+
 
 //oscillatorO.start();
 //
@@ -250,19 +254,15 @@ const setGame = function() {
   let i;
   if (player === 'x' && $(this).text() === '') {
     $(this).text('x');
-    startOscoscillatorX();
     gameTurns++;
     player = 'o';
     $('.info').text('it is ' + player + '\'s move');
-    stopOscoscillatorX();
   }
   if (player === 'o' && $(this).text() === '') {
     $(this).text('o');
-    startOscoscillatorO();
     gameTurns++;
     player = 'x';
     $('.info').text('it is ' + player + '\'s move');
-    stopOscoscillatorO();
   }
   i = $(this).data('index');
   gameBoardArray[i] = $(this).text();

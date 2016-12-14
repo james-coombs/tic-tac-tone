@@ -17,8 +17,14 @@ $(() => {
   $('.sign-out-button').on('click', userEvents.onSignOutUser);
   $('#new-game-button').on('click', gameEvents.onNewGame);
   $('.game-cell').on('click', gameEvents.setGame);
-  //$('#new-game-button').on('click', gameEvents.clearGameBoardArray);
   $('#get-game-by-id').on('submit', gameEvents.onGetGameById);
-  //$('#get-game-by-id').on('submit', gameEvents.createOldGameArray);
   $('#get-games-played-button').on('click', gameEvents.onGetGamesPlayed);
+  $('.playX').on('click', gameEvents.startOscoscillatorX);
+  $('.stopX').on('click', gameEvents.stopOscoscillatorX);
+  $('.playO').on('click', gameEvents.startOscoscillatorO);
+  $('.stopO').on('click', gameEvents.stopOscoscillatorO);
+  $('.game-cell').on('mousedown', gameEvents.startOscoscillatorX);
+  $('.game-cell').on('mouseup', gameEvents.stopOscoscillatorX);
+  $('.game-cell').on('mousedown', gameEvents.startOscoscillatorO);
+  $('.game-cell').on('mouseup', gameEvents.stopOscoscillatorO);
 });
