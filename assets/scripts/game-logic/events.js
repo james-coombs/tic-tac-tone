@@ -16,7 +16,9 @@ let gameIsOver = false;
 // variable for X/O switching
 let player = 'x';
 
+let oscillatorXIsOn = false;
 
+let oscillatorOIsOn = false;
 
 // reset board and 'POST' for new game
 const onNewGame = function onNewGame(event) {
@@ -54,7 +56,6 @@ const onGetGamesPlayed = function (data) {
 
 const gameResolutionTie = function() {
   if (gameTurns === 9) {
-    //console.log('Tie');
     $('.info').text('It is a tie. Press the New Game button to play a new game.');
     gameIsOver = true;
   }
@@ -162,11 +163,12 @@ oscillatorX.type = 'sine'; // sine wave — other values are 'square', 'sawtooth
 oscillatorX.frequency.value = 150; // value in hertz
 
 const stopOscoscillatorX = () => {
+  oscillatorXIsOn = false;
   gainNodeX.disconnect(audioCtxX.destination);
 };
 
 const startOscoscillatorX = () => {
-  if (player === 'x')
+  oscillatorXIsOn = true;
   {gainNodeX.connect(audioCtxX.destination);
   oscillatorX.start();}
 };
@@ -182,73 +184,27 @@ oscillatorO.type = 'triangle'; // sine wave — other values are 'square', 'sawt
 oscillatorO.frequency.value = 200; // value in hertz
 
 const stopOscoscillatorO = () => {
+  oscillatorOIsOn = false;
   gainNodeO.disconnect(audioCtxO.destination);
 };
 
 const startOscoscillatorO = () => {
-  if (player === 'o')
+  oscillatorOIsOn = true;
   {gainNodeO.connect(audioCtxO.destination);
   oscillatorO.start();}
 };
 
+const stopOscillatorOInterval = window.setInterval(stopOscoscillatorO, 1000);
+const stopOscillatorXInterval = window.setInterval(stopOscoscillatorX, 1000);
 
-//oscillatorO.start();
-//
-// oscillator.type = 'triangle'; // sine wave — other values are 'square', 'sawtooth', 'triangle' and 'custom'
-// oscillator.frequency.value = 300; // value in hertz
-// oscillator.start();
-//
-// let WIDTH = window.innerWidth;
-// let HEIGHT = window.innerHeight;
-//
-// let maxFreq = 6000;
-// let maxVol = 1;
-//
-// let initialFreq = 3000;
-// let initialVol = 0.5;
-//
-// // Mouse pointer coordinates
-//
-// let CurX;
-// let CurY;
-//
-// // Get new mouse pointer coordinates when mouse is moved
-// // then set new gain and pitch values
-//
-// function updatePage(e) {
-//     CurX = (window.Event) ? e.pageX : event.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
-//     CurY = (window.Event) ? e.pageY : event.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
-//
-//     oscillator.frequency.value = (CurX/WIDTH) * maxFreq;
-//     gainNode.gain.value = (CurY/HEIGHT) * maxVol;
-//
-//     //canvasDraw();
-// }
-//
-// document.onmousemove = updatePage;
-//
-// // set options for the oscillator
-//
-// oscillator.type = 'sine'; // sine wave — other values are 'square', 'sawtooth', 'triangle' and 'custom'
-// oscillator.frequency.value = initialFreq; // value in hertz
-// oscillator.start();
-//
-// gainNode.gain.value = initialVol;
-//
-// let mute = document.querySelector('.mute');
-//
-// mute.onclick = function() {
-//   if(mute.id === "") {
-//     gainNode.disconnect(audioCtx.destination);
-//     mute.id = "activated";
-//     mute.innerHTML = "Unmute";
-//   } else {
-//     gainNode.connect(audioCtx.destination);
-//     mute.id = "";
-//     mute.innerHTML = "Mute";
-//   }
-// };
-
+const switchTone = () => {
+  if (player === 'x')
+    {startOscoscillatorX(); stopOscoscillatorO();}
+  if (player === 'o')
+    {startOscoscillatorO(); stopOscoscillatorX();}
+  else
+    {stopOscoscillatorO(); stopOscoscillatorX();}
+};
 
 const setGame = function() {
   let i;
@@ -288,4 +244,7 @@ module.exports = {
   stopOscoscillatorX,
   startOscoscillatorO,
   stopOscoscillatorO,
+  switchTone,
+  stopOscillatorOInterval,
+  stopOscillatorXInterval,
 };
